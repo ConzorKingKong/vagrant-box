@@ -33,7 +33,7 @@
         name: nginx
         state: latest
     - name: add nginx server file
-      shell: src=cla.conf dest=/etc/nginx/conf.d/cla.conf
+      copy: src=cla.conf dest=/etc/nginx/conf.d/cla.conf
     - name: reload nginx
       shell: sudo nginx -s reload 
     - name: install git
