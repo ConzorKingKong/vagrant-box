@@ -7,7 +7,7 @@
       shell: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
       become: true
     - name: create source list file for mongodb
-      shell: echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+      copy: src=mongodb-org-3.2.list dest=/etc/apt/sources.list.d/mongodb-org-3.2.list
     - name: Add node files
       shell: curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
     - name: install node
