@@ -37,15 +37,13 @@
         name: git
     - name: clone git repo
       shell: git clone https://github.com/cla-assistant/cla-assistant.git
-    - name: move into cla directory
-      shell: cd /home/vagrant/cla-assistant
     - name: make .env file
-      shell: echo "export PORT=5000\nexport PROTOCOL=http\nexport HOST=localhost\nexport MONGODB=mongodb://cla_assistant:cla_assistant@localhost:27017/cla_assistant\nexport GITHUB_CLIENT=\nexport GITHUB_SECRET=\n\nexport GITHUB_USER=\nexport GITHUB_PASS=" > .env
-    - name: npm install
-      shell: npm install
+      shell: echo "export PORT=5000\nexport PROTOCOL=http\nexport HOST=localhost\nexport MONGODB=mongodb://cla_assistant:cla_assistant@localhost:27017/cla_assistant\nexport GITHUB_CLIENT=\nexport GITHUB_SECRET=\n\nexport GITHUB_USER=\nexport GITHUB_PASS=" > /home/vagrant/cla-assistant/.env
+    - name: change directory and npm install
+      shell: cd /home/vagrant/cla-assistant && sudo npm install
     - name: build with grunt
-      shell: ./node_modules/grunt-cli/bin/grunt build
+      shell: cd /home/vagrant/cla-assistant && /home/vagrant/cla-assistant/node_modules/grunt-cli/bin/grunt build
     - name: source .env
-      shell: ./ . .env
+      shell: source /home/vagrant/cla-assistant/.env
     - name: create cla autostart file
-      shell: npm start
+      shell: echo "[Unit]\nDescription=Run Cla-Assistant\n\n[Service]\nEnvironmentFile=/home/vagrant/cla-assistant/.env\nWorkingDirectory=/home/vagrant/cla-assistant\nExecStart=/usr/local/vin/node app.js\nRestart=always\n\n[Install]\nWantedBy=multi-user.target" > /etc/systemd/system/cla.service
