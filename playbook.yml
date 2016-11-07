@@ -24,6 +24,10 @@
       apt:
         name: nodejs
         state: present
+    - name: install build essential
+      apt:
+        name: build-essential
+        state: present
     - name: install nginx
       apt:
         name: nginx
