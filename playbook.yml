@@ -1,59 +1,49 @@
----
 
 - hosts: all
-  sudo: true
+  become: true
   tasks:
-    - name: add mongodb key
-      shell: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-      become: true
-    - name: create source list file for mongodb
-      copy: src=mongodb-org-3.2.list dest=/etc/apt/sources.list.d/mongodb-org-3.2.list
-    - name: Add node files
-      shell: curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
-    - name: install node
-      apt:
-        name: nodejs
-        state: present
-    - name: install build essential
-      apt:
-        name: build-essential
-        state: present
-    - name: update
+    - name: Update system
       apt:
         update_cache: yes
-    - name: upgrade
+        upgrade: safe
+
+    - name: Install packages via apt
       apt:
-        upgrade: yes
-    - name: install mongodb
-      apt:
-        name: mongodb-org
+        name: "{{ item }}"
         state: present
-    - name: install nginx
-      apt:
-        name: nginx
-        state: latest
-    - name: add nginx server file
+      with_items:
+        - build-essential
+        - git
+        - mongodb
+        - nginx
+        - nodejs
+
+    # NOTE! Use this instead, http://docs.ansible.com/ansible/git_module.html
+    # - name: clone git repo
+    #   shell: git clone https://github.com/cla-assistant/cla-assistant.git
+
+    # NOTE! Use this instead, http://docs.ansible.com/ansible/npm_module.html
+    # - name: change directory and npm install
+    #   shell: sudo npm install
+    #   args:
+    #     chdir: /home/vagrant/cla-assistant
+
+    # Note! This should only be run **IF** we just installed the node_modules.
+    # - name: build with grunt
+    #   shell: /home/vagrant/cla-assistant/node_modules/grunt-cli/bin/grunt build
+    #   args:
+    #     chdir: /home/vagrant/cla-assistant
+
+    - name: Add NGINX configuration for CLA service
       copy: src=cla.conf dest=/etc/nginx/conf.d/cla.conf
-    - name: reload nginx
-      shell: sudo nginx -s reload 
-    - name: install git
-      apt:
-        name: git
-    - name: clone git repo
-      shell: git clone https://github.com/cla-assistant/cla-assistant.git
-    - name: copy .env file
-      copy: src=.env dest=/home/vagrant/cla-assistant/.env
-    - name: change directory and npm install
-      shell: sudo npm install
-      args:
-        chdir: /home/vagrant/cla-assistant
-    - name: build with grunt
-      shell: /home/vagrant/cla-assistant/node_modules/grunt-cli/bin/grunt build
-      args:
-        chdir: /home/vagrant/cla-assistant
-    - name: source .env
-      shell: . /home/vagrant/cla-assistant/.env
-    - name: create cla autostart file
+
+    # Note! Use this instead, https://docs.ansible.com/ansible/systemd_module.html
+    # - name: reload nginx
+    #   shell: sudo nginx -s reload
+
+    # - name: Copy .env file
+    #   copy: src=cla-assistant.env dest=/home/vagrant/cla-assistant/.env
+
+    - name: Create CLA autostart file
       copy: src=cla.service dest=/etc/systemd/system/cla.service
-    - name: REBOOT
-      shell: sudo shutdown -r now
+
