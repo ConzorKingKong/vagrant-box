@@ -3,8 +3,49 @@
 - hosts: all
   sudo: true
   tasks:
-    - name: update apt cache
-      apt: update_cache=yes
-    - name: upgrade packages
-      apt: 
-        upgrade: dist
+    - name: add mongodb key
+      shell: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+      become: true
+    - name: create source list file for mongodb
+      shell: echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+    - name: Add node files
+      shell: curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
+    - name: update
+      apt:
+        update_cache: yes
+    - name: upgrade
+      apt:
+        upgrade: yes
+    - name: install mongodb
+      apt:
+        name: mongodb-org
+        state: present
+    - name: install node
+      apt:
+        name: nodejs
+        state: present
+    - name: install nginx
+      apt:
+        name: nginx
+        state: latest
+    - name: add nginx server file
+      shell: echo "server {\nlisten 8080;\nlocation / {\nproxy_pass http://localhost:5000;\n}\n}" > /etc/nginx/conf.d/cla.conf
+    - name: reload nginx
+      shell: sudo nginx -s reload 
+    - name: install git
+      apt:
+        name: git
+    - name: clone git repo
+      shell: git clone https://github.com/cla-assistant/cla-assistant.git
+    - name: move into cla directory
+      shell: cd /home/vagrant/cla-assistant
+    - name: make .env file
+      shell: echo "export PORT=5000\nexport PROTOCOL=http\nexport HOST=localhost\nexport MONGODB=mongodb://cla_assistant:cla_assistant@localhost:27017/cla_assistant\nexport GITHUB_CLIENT=\nexport GITHUB_SECRET=\n\nexport GITHUB_USER=\nexport GITHUB_PASS=" > .env
+    - name: npm install
+      shell: npm install
+    - name: build with grunt
+      shell: ./node_modules/grunt-cli/bin/grunt build
+    - name: source .env
+      shell: ./ . .env
+    - name: create cla autostart file
+      shell: npm start
