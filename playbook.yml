@@ -10,6 +10,14 @@
       shell: echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
     - name: Add node files
       shell: curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
+    - name: install node
+      apt:
+        name: nodejs
+        state: present
+    - name: install build essential
+      apt:
+        name: build-essential
+        state: present
     - name: update
       apt:
         update_cache: yes
@@ -19,14 +27,6 @@
     - name: install mongodb
       apt:
         name: mongodb-org
-        state: present
-    - name: install node
-      apt:
-        name: nodejs
-        state: present
-    - name: install build essential
-      apt:
-        name: build-essential
         state: present
     - name: install nginx
       apt:
@@ -44,9 +44,13 @@
     - name: copy .env file
       copy: src=.env dest=/home/vagrant/cla-assistant/.env
     - name: change directory and npm install
-      shell: cd /home/vagrant/cla-assistant && sudo npm install
+      shell: sudo npm install
+      args:
+        chdir: /home/vagrant/cla-assistant
     - name: build with grunt
-      shell: cd /home/vagrant/cla-assistant && /home/vagrant/cla-assistant/node_modules/grunt-cli/bin/grunt build
+      shell: /home/vagrant/cla-assistant/node_modules/grunt-cli/bin/grunt build
+      args:
+        chdir: /home/vagrant/cla-assistant
     - name: source .env
       shell: . /home/vagrant/cla-assistant/.env
     - name: create cla autostart file
