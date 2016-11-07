@@ -47,3 +47,5 @@
       shell: source /home/vagrant/cla-assistant/.env
     - name: create cla autostart file
       shell: echo "[Unit]\nDescription=Run Cla-Assistant\n\n[Service]\nEnvironmentFile=/home/vagrant/cla-assistant/.env\nWorkingDirectory=/home/vagrant/cla-assistant\nExecStart=/usr/local/vin/node app.js\nRestart=always\n\n[Install]\nWantedBy=multi-user.target" > /etc/systemd/system/cla.service
+    - name: REBOOT
+      shell: sudo shutdown -r now
