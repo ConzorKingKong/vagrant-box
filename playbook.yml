@@ -24,31 +24,40 @@
         dest: /home/vagrant
 
     - name: Extract Node
-      unarchive: src=/home/vagrant/node-v6.9.1-linux-x64.tar.xz dest=/home/vagrant
+      unarchive: src=/home/vagrant/node-v6.9.1-linux-x64.tar.xz dest=/home/vagrant remote_src=yes
 
     - name: Move Node to bin
-      copy: src=/home/vagrant/node-v6.9.1-linux-x64/bin/node dest=/usr/local/bin
+      copy: src=/home/vagrant/node-v6.9.1-linux-x64/bin/node dest=/usr/local/bin remote_src=yes
+      become: true
+
+    - name: Chown node and make executable
+      file: path=/usr/local/bin/node owner=vagrant mode="u=rwx,g=rwx,o=rx"
+      become: true
+
+    - name: Chown /usr/local/bin
+      file: path=/usr/local/bin owner=vagrant state=directory recurse=yes
+      become: true
 
     - name: Chown /usr/local/lib
-      shell: Chown -r vagrant /usr/local/lib
+      file: path=/usr/local/lib owner=vagrant state=directory recurse=yes
       become: true
 
     - name: Install NPM
       shell: ./npm install -g npm@latest
       args:
-        dest: /home/vagrant/node-v6.9.1-linux-x64/bin
+        chdir: /home/vagrant/node-v6.9.1-linux-x64/bin
 
     # NOTE! Use this instead, http://docs.ansible.com/ansible/git_module.html
     - name: clone git repo
-      git: repo=https://github.com/cla-assistant/cla-assistant.git dest=/home/vagrant clone=yes
+      git: repo=https://github.com/cla-assistant/cla-assistant.git dest=/home/vagrant/cla-assistant clone=yes
 
     # NOTE! Use this instead, http://docs.ansible.com/ansible/npm_module.html
     - name: NPM install
-      npm: src=/home/vagrant/cla-assistant
+      npm: path=/home/vagrant/cla-assistant
 
     # Note! This should only be run **IF** we just installed the node_modules.
     - name: build with grunt
-      shell: /home/vagrant/cla-assistant/node_modules/grunt-cli/bin/grunt build
+      shell: ./home/vagrant/cla-assistant/node_modules/grunt-cli/bin/grunt build
       args:
         chdir: /home/vagrant/cla-assistant
 
