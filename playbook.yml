@@ -16,7 +16,12 @@
         - git
         - mongodb
         - nginx
+        - python-dev
+        - python-pip
       become: true
+
+    - name: Install pymongo
+      pip: name=pymongo
 
     - name: Pull Node
       get_url: 
