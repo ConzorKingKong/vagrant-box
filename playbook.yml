@@ -47,17 +47,18 @@
       args:
         chdir: /home/vagrant/node-v6.9.1-linux-x64/bin
 
-    # NOTE! Use this instead, http://docs.ansible.com/ansible/git_module.html
     - name: clone git repo
       git: repo=https://github.com/cla-assistant/cla-assistant.git dest=/home/vagrant/cla-assistant clone=yes
 
-    # NOTE! Use this instead, http://docs.ansible.com/ansible/npm_module.html
+    - name: Create mongodb user
+      mongodb_user: database=cla_assistant name=cla_assistant password=cla_assistant state=present
+
     - name: NPM install
       npm: path=/home/vagrant/cla-assistant
 
     # Note! This should only be run **IF** we just installed the node_modules.
     - name: build with grunt
-      shell: ./home/vagrant/cla-assistant/node_modules/grunt-cli/bin/grunt build
+      shell: ./node_modules/grunt-cli/bin/grunt build
       args:
         chdir: /home/vagrant/cla-assistant
 
