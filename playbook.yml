@@ -20,8 +20,9 @@
         - python-pip
       become: true
 
-    - name: Install pymongo
-      pip: name=pymongo
+    - name: Create /data/db folder for Mongo
+      file: path=/data/db state=directory
+      become: true
 
     - name: Pull Node
       get_url: 
@@ -47,6 +48,9 @@
       file: path=/usr/local/lib owner=vagrant state=directory recurse=yes
       become: true
 
+    - name: Install pymongo (dep for ansible's mongo_user)
+      pip: name=pymongo
+
     - name: Install NPM
       shell: ./npm install -g npm@latest
       args:
@@ -55,8 +59,8 @@
     - name: clone git repo
       git: repo=https://github.com/cla-assistant/cla-assistant.git dest=/home/vagrant/cla-assistant clone=yes
 
-    - name: Create mongodb user
-      mongodb_user: database=cla_assistant name=cla_assistant password=cla_assistant state=present
+   # - name: Create mongodb user
+   #   mongodb_user: database=cla_assistant name=cla_assistant password=cla_assistant state=present
 
     - name: NPM install
       npm: path=/home/vagrant/cla-assistant
@@ -69,15 +73,23 @@
 
     - name: Add NGINX configuration for CLA service
       copy: src=files/cla.conf dest=/etc/nginx/conf.d/cla.conf
+      become: true
 
     # Note! Use this instead, https://docs.ansible.com/ansible/systemd_module.html
     - name: Reload Nginx
       systemd:
         name: nginx
         state: restarted
+      become: true
 
     - name: Copy .env file
       copy: src=files/cla-assistant.env dest=/home/vagrant/cla-assistant/.env
 
+    - name: Source .env
+      shell: . ./.env
+      args:
+        chdir: /home/vagrant/cla-assistant
+
     - name: Create CLA autostart file
       copy: src=files/cla.service dest=/etc/systemd/system/cla.service
+      become: true
