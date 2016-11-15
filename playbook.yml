@@ -16,8 +16,6 @@
         - git
         - mongodb
         - nginx
-        - python-dev
-        - python-pip
       become: true
 
     - name: Create /data/db folder for Mongo
@@ -47,9 +45,6 @@
     - name: Chown /usr/local/lib
       file: path=/usr/local/lib owner=vagrant state=directory recurse=yes
       become: true
-
-    - name: Install pymongo (dep for ansible's mongo_user)
-      pip: name=pymongo
 
     - name: Create mongodb user
       command: mongo cla_assistant --eval "db.addUser({user"{{":"}}" 'cla_assistant', pwd"{{":"}}" 'cla_assistant', roles"{{":"}}"[]})"
