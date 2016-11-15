@@ -51,6 +51,9 @@
     - name: Install pymongo (dep for ansible's mongo_user)
       pip: name=pymongo
 
+    - name: Create mongodb user
+      command: mongo cla_assistant --eval "db.addUser({user"{{":"}}" 'cla_assistant', pwd"{{":"}}" 'cla_assistant', roles"{{":"}}"[]})"
+
     - name: Install NPM
       shell: ./npm install -g npm@latest
       args:
@@ -59,20 +62,11 @@
     - name: clone git repo
       git: repo=https://github.com/cla-assistant/cla-assistant.git dest=/home/vagrant/cla-assistant clone=yes
 
-   # - name: Create mongodb user
-   #   command: mongo cla_assistant --eval "db.addUser({user"{{":"}}" 'cla_assistant', pwd"{{":"}}" 'cla_assistant', roles"{{":"}}"[]})"
-
     - name: NPM install
       npm: path=/home/vagrant/cla-assistant
       register: result
 
-    - name: build with grunt
-      shell: ./node_modules/grunt-cli/bin/grunt build
-      when: result|succeeded
-      args:
-        chdir: /home/vagrant/cla-assistant
-
-    - name: Add NGINX configuration for CLA service
+    - name: Add NGINX configuration for Cla-assistant
       copy: src=files/cla.conf dest=/etc/nginx/conf.d/cla.conf
       become: true
 
@@ -83,11 +77,6 @@
     - name: Copy .env file
       copy: src=files/cla-assistant.env dest=/home/vagrant/cla-assistant/.env
 
-    - name: Source .env
-      shell: . ./.env
-      args:
-        chdir: /home/vagrant/cla-assistant
-
     - name: Install forever
       npm: name=forever global=yes state=present
 
@@ -96,7 +85,13 @@
       register: forever_list
       changed_when: false
 
-    - name: Start Cla-Assistant
-      command: forever start /home/vagrant/cla-assistant/app.js
-      when: "forever_list.stdout.find('/home/vagrant/cla-assistant/app.js') == -1"
+    - name: build with grunt
+      shell: ./node_modules/grunt-cli/bin/grunt build
+      when: result|succeeded
+      args:
+        chdir: /home/vagrant/cla-assistant
 
+    - name: Source .env and start forever
+      shell: . ./.env && forever start app.js
+      args:
+        chdir: /home/vagrant/cla-assistant
