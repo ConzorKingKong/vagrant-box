@@ -10,6 +10,6 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "playbook.yml"
   end
   config.vm.provider "virtualbox" do |v|
-    v.memory = 1024
+    v.memory = 2048
   end
 end
