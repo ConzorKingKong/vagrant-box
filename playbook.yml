@@ -28,8 +28,9 @@
     - name: Copy db_backup script to scripts folder
       copy: src=files/db_backup.sh dest=~/scripts
 
-    - name: Add cronjob for db_backup
-      cron: name="Backup database" minute="0" hour="0" job="~/scripts/db_backup.sh"
+    - name: Add weekly cronjob for db_backup
+      cron: name="backup database" minute="0" hour="0" weekday="0" cron_file="db_backup" user="root" job="/home/vagrant/scripts/db_backup.sh"
+      become: true
 
     - name: Pull Node
       get_url: 
