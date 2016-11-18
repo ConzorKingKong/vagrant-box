@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DIR= 'date + %m%d%y'
+DIR=$(date +%F)
 DEST=/db_backups/$DIR
-mkdir $DEST
-mongodump -h localhost:5000 -d cla_assistant -u cla_assistant -p cla_assistant -o $DEST
+mkdir -p $DEST
+mongodump -h localhost:27017 -d cla_assistant -u cla_assistant -p cla_assistant -o $DEST
